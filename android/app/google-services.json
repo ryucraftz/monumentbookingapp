@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "889638409698",
+    "project_id": "monumentapp-1536a",
+    "storage_bucket": "monumentapp-1536a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889638409698:android:429af559072964699455bb",
+        "android_client_info": {
+          "package_name": "com.example.monumentbookingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOrDpWfcHIRsp1qAD7zqe9vBDdAMRKXn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
