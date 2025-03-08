@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:monumentbookingapp/pages/admin/upload_event.dart';
 import 'package:monumentbookingapp/pages/signup.dart'; // Assuming this is needed
 
 void main() async {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SignUp(), // Set the initial screen to SignUp
+      home: UploadEvent(), // Set the initial screen to SignUp
     );
   }
 }
