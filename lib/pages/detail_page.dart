@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 
 class DetailPage extends StatefulWidget {
-  const DetailPage({super.key});
+  final String image, name, location, date, detail, price;
+  DetailPage({
+    required this.date,
+    required this.detail,
+    required this.image,
+    required this.name,
+    required this.location,
+    required this.price,
+  });
 
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
+  int ticket = 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,11 +27,24 @@ class _DetailPageState extends State<DetailPage> {
           children: [
             Stack(
               children: [
-                Image.asset(
-                  "images/agra.jpg",
+                Image.network(
+                  widget.image,
                   height: MediaQuery.of(context).size.height / 2,
                   width: MediaQuery.of(context).size.width,
                   fit: BoxFit.cover,
+                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                    return Center(child: Text('Failed to load image'));
+                  },
                 ),
                 Container(
                   height: MediaQuery.of(context).size.height / 2,
@@ -55,7 +78,7 @@ class _DetailPageState extends State<DetailPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Taj-Mahal Heritage Site",
+                              widget.name,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 25.0,
@@ -67,7 +90,7 @@ class _DetailPageState extends State<DetailPage> {
                                 Icon(Icons.calendar_month, color: Colors.white),
                                 SizedBox(width: 10.0),
                                 Text(
-                                  "31 Mar 2025",
+                                  widget.date,
                                   style: TextStyle(
                                     color: Color.fromARGB(211, 255, 255, 255),
                                     fontSize: 19.0,
@@ -80,7 +103,7 @@ class _DetailPageState extends State<DetailPage> {
                                 ),
                                 SizedBox(width: 10.0),
                                 Text(
-                                  "Agra, India",
+                                  widget.location,
                                   style: TextStyle(
                                     color: Color.fromARGB(211, 255, 255, 255),
                                     fontSize: 19.0,
@@ -113,7 +136,7 @@ class _DetailPageState extends State<DetailPage> {
             Padding(
               padding: const EdgeInsets.only(left: 20.0),
               child: Text(
-                "The Taj Mahal is an ivory-white marble mausoleum on the right bank of the river Yamuna in Agra, Uttar Pradesh, India. It was commissioned in 1631 by the fifth Mughal emperor, Shah Jahan to house the tomb of his beloved wife, Mumtaz Mahal; it also houses the tomb of Shah Jahan himself.",
+                widget.detail,
                 style: TextStyle(
                   color: Colors.black87,
                   fontSize: 18.0,
@@ -121,47 +144,49 @@ class _DetailPageState extends State<DetailPage> {
                 ),
               ),
             ),
-            SizedBox(height: 30.0,),
+            SizedBox(height: 30.0),
             Padding(
               padding: const EdgeInsets.only(left: 20.0),
-              child: Row(children: [
-                Text(
-                  "Number of Tickets",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                ),
-                Container(
-                  width: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black54, width: 2.0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(children: [
-                    Text(
-                      "+",
-                      style: TextStyle(color: Colors.black, fontSize: 25.0),
+              child: Row(
+                children: [
+                  Text(
+                    "Number of Tickets",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Text(
-                      "3",
-                      style: TextStyle(
-                        color: Color(0xff6351ec),
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.bold
-                      ),
+                  ),
+                  SizedBox(width: 40),
+                  Container(
+                    width: 50,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black54, width: 2.0),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    Text(
-                      "-",
-                      style: TextStyle(color: Colors.black, fontSize: 25.0),
-                    )
-                  ],)
-                ),
-              ],),
+                    child: Column(
+                      children: [
+                        Text(
+                          "+",
+                          style: TextStyle(color: Colors.black, fontSize: 25.0),
+                        ),
+                        Text(
+                          ticket.toString(),
+                          style: TextStyle(
+                            color: Color(0xff6351ec),
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "-",
+                          style: TextStyle(color: Colors.black, fontSize: 25.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 20.0),
             Padding(
@@ -169,32 +194,35 @@ class _DetailPageState extends State<DetailPage> {
               child: Row(
                 children: [
                   Text(
-                    "Amount : \$37.83",
+                    "Amount : \$" + widget.price,
                     style: TextStyle(
                       color: Color(0xff6351ec),
                       fontSize: 23.0,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(width: 20.0),
                   Container(
                     width: 200,
                     height: 50,
-                    decoration: BoxDecoration(color: Color(0xff6351ec), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                      color: Color(0xff6351ec),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: Center(
                       child: Text(
                         "Book Now",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 25.0,
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
