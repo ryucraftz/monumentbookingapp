@@ -238,11 +238,14 @@ class _HomeState extends State<Home> {
                       margin: EdgeInsets.only(bottom: 5.0),
                       child: Material(
                         elevation: 3.0,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(10), // Set border radius here
                         child: Container(
                           width: 100,
                           padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10), // Set border radius here
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -269,11 +272,14 @@ class _HomeState extends State<Home> {
                       margin: EdgeInsets.only(bottom: 5.0),
                       child: Material(
                         elevation: 3.0,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(10), // Set border radius here
                         child: Container(
                           width: 100,
                           padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10), // Set border radius here
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -300,11 +306,14 @@ class _HomeState extends State<Home> {
                       margin: EdgeInsets.only(bottom: 5.0),
                       child: Material(
                         elevation: 3.0,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(10), // Set border radius here
                         child: Container(
                           width: 100,
                           padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10), // Set border radius here
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

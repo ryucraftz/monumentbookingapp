@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:monumentbookingapp/pages/admin/upload_event.dart';
 import 'package:monumentbookingapp/pages/bottomnav.dart';
 import 'package:monumentbookingapp/pages/home.dart';
-import 'package:monumentbookingapp/pages/signup.dart'; // Assuming this is needed
+import 'package:monumentbookingapp/pages/signup.dart';
+import 'package:monumentbookingapp/services/data.dart'; // Assuming this is needed
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Corrected method name
+  WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = publishdkey; // Corrected method name
   await Firebase.initializeApp(); // Initialize Firebase
   runApp(const MyApp());
 }
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: BottomNav(), // Set the initial screen to SignUp
+      home: SignUp(), // Set the initial screen to SignUp
     );
   }
 }

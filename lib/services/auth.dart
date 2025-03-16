@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:monumentbookingapp/pages/bottomnav.dart';
 import 'package:monumentbookingapp/services/database.dart';
+import 'package:monumentbookingapp/services/shared_pref.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthMethods {
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -15,7 +17,8 @@ class AuthMethods {
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
-    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
     final GoogleSignInAuthentication? googleSignInAuthentication =
         await googleSignInAccount?.authentication;
 
@@ -26,6 +29,10 @@ class AuthMethods {
 
     UserCredential result = await firebaseAuth.signInWithCredential(credential);
     User? userDetails = result.user;
+    await SharedPreferenceHelper().saveUserEmail(userDetails!.email!);
+    await SharedPreferenceHelper().saveUserName(userDetails.displayName!);
+    await SharedPreferenceHelper().saveUserImage(userDetails.photoURL!);
+    await SharedPreferenceHelper().saveUserId(userDetails.uid);
 
     if (result.user != null) {
       Map<String, dynamic> userInfoMap = {
