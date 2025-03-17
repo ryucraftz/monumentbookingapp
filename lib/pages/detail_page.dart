@@ -318,6 +318,7 @@ class _DetailPageState extends State<DetailPage> {
         "Date": widget.date,
         "Name": name,
         "Image": image,
+        "EventImage": widget.image
       };
       await DatabaseMethods().addUserBooking(bookingdetail, id!).then((
         value,

@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:monumentbookingapp/pages/admin/admin_login.dart';
+import 'package:monumentbookingapp/pages/admin/home_admin.dart';
+import 'package:monumentbookingapp/pages/admin/ticket_event.dart';
 import 'package:monumentbookingapp/pages/admin/upload_event.dart';
+import 'package:monumentbookingapp/pages/booking.dart';
 import 'package:monumentbookingapp/pages/bottomnav.dart';
+import 'package:monumentbookingapp/pages/categories_event.dart';
 import 'package:monumentbookingapp/pages/home.dart';
 import 'package:monumentbookingapp/pages/signup.dart';
 import 'package:monumentbookingapp/services/data.dart'; // Assuming this is needed

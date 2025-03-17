@@ -1,49 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:monumentbookingapp/services/database.dart';
-import 'package:monumentbookingapp/services/shared_pref.dart';
 
-class Booking extends StatefulWidget {
-  const Booking({super.key});
+class TicketEvent extends StatefulWidget {
+  const TicketEvent({super.key});
 
   @override
-  State<Booking> createState() => _BookingState();
+  State<TicketEvent> createState() => _TicketEventState();
 }
 
-class _BookingState extends State<Booking> {
-  Stream? bookingStream;
-  String? id;
-
-  getthesahredpref() async {
-    id = await SharedPreferenceHelper().getUserId();
-    setState(() {});
-  }
+class _TicketEventState extends State<TicketEvent> {
+  Stream? ticketStream;
 
   ontheload() async {
-    await getthesahredpref();
-    bookingStream = await DatabaseMethods().getbookings(id!);
+    ticketStream = await DatabaseMethods().getTickets();
     setState(() {});
   }
 
   @override
   void initState() {
-    ontheload();
     super.initState();
+    ontheload();
   }
 
-  Widget allbookings() {
+  Widget allTickets() {
     return StreamBuilder(
-      stream: bookingStream,
+      stream: ticketStream,
       builder: (context, AsyncSnapshot snapshot) {
         return snapshot.hasData
             ? ListView.builder(
                 padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics:
+                    const NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data.docs[index];
-
                   return Container(
-                    margin: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+                    margin: const EdgeInsets.only(
+                        left: 20.0, right: 20.0, bottom: 20.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.black38, width: 2.0),
@@ -51,15 +47,16 @@ class _BookingState extends State<Booking> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.location_on_outlined, color: Colors.blue),
-                            SizedBox(height: 20.0),
+                            const Icon(Icons.location_on_outlined,
+                                color: Colors.blue),
+                            const SizedBox(width: 10.0),
                             Text(
                               ds["Location"],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.w500,
@@ -67,7 +64,7 @@ class _BookingState extends State<Booking> {
                             ),
                           ],
                         ),
-                        Divider(),
+                        const Divider(),
                         Padding(
                           padding: const EdgeInsets.only(left: 10, bottom: 10),
                           child: Row(
@@ -81,29 +78,47 @@ class _BookingState extends State<Booking> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              SizedBox(width: 20.0),
+                              const SizedBox(width: 20.0),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     ds["Event"],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 19.0,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  SizedBox(height: 5.0),
+                                  const SizedBox(height: 5.0),
                                   Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.calendar_month,
                                         color: Colors.blue,
                                       ),
-                                      SizedBox(width: 5.0),
+                                      const SizedBox(width: 5.0),
                                       Text(
                                         ds["Date"],
-                                        style: TextStyle(
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 19.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5.0),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.person,
+                                        color: Colors.blue,
+                                      ),
+                                      const SizedBox(width: 5.0),
+                                      Text(
+                                        ds["Name"],
+                                        style: const TextStyle(
                                           color: Colors.black,
                                           fontSize: 19.0,
                                           fontWeight: FontWeight.w500,
@@ -113,25 +128,26 @@ class _BookingState extends State<Booking> {
                                   ),
                                   Row(
                                     children: [
-                                      Icon(Icons.group, color: Colors.blue),
-                                      SizedBox(width: 10.0),
+                                      const Icon(Icons.group,
+                                          color: Colors.blue),
+                                      const SizedBox(width: 10.0),
                                       Text(
                                         ds["Number"],
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.black,
                                           fontSize: 19.0,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      SizedBox(width: 10.0),
-                                      Icon(
+                                      const SizedBox(width: 10.0),
+                                      const Icon(
                                         Icons.monetization_on,
                                         color: Colors.blue,
                                       ),
-                                      SizedBox(width: 10.0),
+                                      const SizedBox(width: 10.0),
                                       Text(
                                         "\$" + ds["Total"],
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.black,
                                           fontSize: 20.0,
                                           fontWeight: FontWeight.bold,
@@ -149,7 +165,7 @@ class _BookingState extends State<Booking> {
                   );
                 },
               )
-            : Center(child: CircularProgressIndicator()); // Show a loader while data is loading
+            : Container();
       },
     );
   }
@@ -157,41 +173,37 @@ class _BookingState extends State<Booking> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.only(top: 50.0),
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xffe3e6ff), Color(0xfff1f3ff), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              "Bookings",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 30.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 20.0),
-            Expanded(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.only(left: 10.0, top: 40.0),
+          child: Column(
+            children: [
+              // Back Button and Title
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(Icons.arrow_back_ios_new_outlined),
                   ),
-                  color: Colors.white,
-                ),
-                child: allbookings(),
+                  SizedBox(width: MediaQuery.of(context).size.width / 4.5),
+                  const Text(
+                    "Monument Tickets",
+                    style: TextStyle(
+                      color: Color(0xff6351ec),
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 20.0),
+
+              // Tickets List
+              allTickets(),
+            ],
+          ),
         ),
       ),
     );
