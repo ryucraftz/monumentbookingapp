@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'package:monumentbookingapp/services/database.dart';
 import 'package:monumentbookingapp/services/shared_pref.dart';
+import 'package:qr_flutter/qr_flutter.dart'; // Import the qr_flutter package
 
 class DetailPage extends StatefulWidget {
   final String image, name, location, date, detail, price;
@@ -26,6 +26,7 @@ class _DetailPageState extends State<DetailPage> {
   int ticket = 1;
   int total = 0;
   String? name, image, id;
+  String? qrData; // Store the QR code data
 
   @override
   void initState() {
@@ -44,7 +45,7 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -63,11 +64,10 @@ class _DetailPageState extends State<DetailPage> {
                     if (loadingProgress == null) return child;
                     return Center(
                       child: CircularProgressIndicator(
-                        value:
-                            loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
                       ),
                     );
                   },
@@ -122,11 +122,13 @@ class _DetailPageState extends State<DetailPage> {
                               children: [
                                 Icon(Icons.calendar_month, color: Colors.white),
                                 SizedBox(width: 10.0),
-                                Text(
-                                  widget.date,
-                                  style: TextStyle(
-                                    color: Color.fromARGB(211, 255, 255, 255),
-                                    fontSize: 19.0,
+                                Flexible(
+                                  child: Text(
+                                    widget.date,
+                                    style: TextStyle(
+                                      color: Color.fromARGB(211, 255, 255, 255),
+                                      fontSize: 19.0,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: 20.0),
@@ -135,11 +137,13 @@ class _DetailPageState extends State<DetailPage> {
                                   color: Colors.white,
                                 ),
                                 SizedBox(width: 10.0),
-                                Text(
-                                  widget.location,
-                                  style: TextStyle(
-                                    color: Color.fromARGB(211, 255, 255, 255),
-                                    fontSize: 19.0,
+                                Flexible(
+                                  child: Text(
+                                    widget.location,
+                                    style: TextStyle(
+                                      color: Color.fromARGB(211, 255, 255, 255),
+                                      fontSize: 19.0,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -257,25 +261,26 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   ),
                   SizedBox(width: 20.0),
-                  GestureDetector(
-                    onTap: () {
-                      print("Book Now button clicked");
-                      makePayment(total.toString());
-                    },
-                    child: Container(
-                      width: 200,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Color(0xff6351ec),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Book Now",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        print("Book Now button clicked");
+                        makePayment(total.toString());
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Color(0xff6351ec),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Book Now",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -307,81 +312,97 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  void displayPaymentSheet() async {
-    try {
-      await Stripe.instance.presentPaymentSheet();
-      Map<String, dynamic> bookingdetail = {
-        "Number": ticket.toString(),
-        "Total": total.toString(),
-        "Event": widget.name,
-        "Location": widget.location,
-        "Date": widget.date,
-        "Name": name,
-        "Image": image,
-        "EventImage": widget.image
-      };
-      await DatabaseMethods().addUserBooking(bookingdetail, id!).then((
-        value,
-      ) async {
-        await DatabaseMethods().addAdminTickets(bookingdetail);
-      });
-      showDialog(
-        context: context,
-        builder:
-            (_) => AlertDialog(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.green),
-                  SizedBox(width: 10),
-                  Text("Payment Successful"),
-                ],
-              ),
-            ),
-      );
-      paymentIntent = null;
-    } catch (e) {
-      print("Error: $e");
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(content: Text("Payment Cancelled")),
-      );
-    }
-  }
-
- Future<Map<String, dynamic>> createPaymentIntent(String amount, String currency) async {
+ void displayPaymentSheet() async {
   try {
-    print("Creating Payment Intent with amount: $amount, currency: $currency");
+    await Stripe.instance.presentPaymentSheet();
 
-    Map<String, dynamic> body = {
-      'amount': calculateAmount(amount),
-      'currency': currency,
-      'payment_method_types[]': 'card',
+    // Generate QR code data
+    qrData = "Event: ${widget.name}, Location: ${widget.location}, Date: ${widget.date}, Tickets: $ticket, Total: \$$total";
+
+    Map<String, dynamic> bookingdetail = {
+      "Number": ticket.toString(),
+      "Total": total.toString(),
+      "Event": widget.name,
+      "Location": widget.location,
+      "Date": widget.date,
+      "Name": name,
+      "Image": image,
+      "EventImage": widget.image,
+      "QRData": qrData, // Add QR code data to booking details
     };
 
-    var response = await http.post(
-      Uri.parse('https://api.stripe.com/v1/payment_intents'),
-      headers: {
-        'Authorization': 'Bearer sk_test_51R36tuKXoPvqIoMiYseEx6lu5JPg3C9sy7H3nMVtHHlZylFHqjVrSKpSdaUiUZMylf7RVr5vyd2b8bgmezphVnnI00zljXseS6', // 🔥 Ensure this is correct!
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: body,
+    await DatabaseMethods().addUserBooking(bookingdetail, id!).then((
+      value,
+    ) async {
+      await DatabaseMethods().addAdminTickets(bookingdetail);
+    });
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.green),
+              SizedBox(height: 10),
+              Text("Payment Successful"),
+              SizedBox(height: 20),
+              QrImageView(
+                data: qrData!,
+                version: QrVersions.auto,
+                size: 200.0,
+              ),
+              SizedBox(height: 20),
+              Text("Scan this QR code for entry"),
+            ],
+          ),
+        ),
+      ),
     );
-
-    print("Stripe API Response Status: ${response.statusCode}");
-    print("Stripe API Response Body: ${response.body}");
-
-    if (response.statusCode != 200) {
-      print("Error: Failed to create payment intent!");
-      return {};
-    }
-
-    return jsonDecode(response.body);
-  } catch (err) {
-    print('Error in createPaymentIntent(): ${err.toString()}'); // ❌ Logs any errors
-    return {};
+    paymentIntent = null;
+  } catch (e) {
+    print("Error: $e");
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(content: Text("Payment Cancelled")),
+    );
   }
 }
 
+  Future<Map<String, dynamic>> createPaymentIntent(String amount, String currency) async {
+    try {
+      print("Creating Payment Intent with amount: $amount, currency: $currency");
+
+      Map<String, dynamic> body = {
+        'amount': calculateAmount(amount),
+        'currency': currency,
+        'payment_method_types[]': 'card',
+      };
+
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        headers: {
+          'Authorization': 'Bearer sk_test_51R36tuKXoPvqIoMiYseEx6lu5JPg3C9sy7H3nMVtHHlZylFHqjVrSKpSdaUiUZMylf7RVr5vyd2b8bgmezphVnnI00zljXseS6', // 🔥 Ensure this is correct!
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body,
+      );
+
+      print("Stripe API Response Status: ${response.statusCode}");
+      print("Stripe API Response Body: ${response.body}");
+
+      if (response.statusCode != 200) {
+        print("Error: Failed to create payment intent!");
+        return {};
+      }
+
+      return jsonDecode(response.body);
+    } catch (err) {
+      print('Error in createPaymentIntent(): ${err.toString()}'); // ❌ Logs any errors
+      return {};
+    }
+  }
 
   String calculateAmount(String amount) {
     final calculatedAmount = (int.parse(amount) * 100);

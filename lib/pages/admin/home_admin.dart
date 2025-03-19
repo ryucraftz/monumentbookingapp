@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:monumentbookingapp/pages/admin/ticket_event.dart';
 import 'package:monumentbookingapp/pages/admin/upload_event.dart';
+import 'package:monumentbookingapp/pages/qr_validation_page.dart'; // Import the QR validation page
 
 class HomeAdmin extends StatefulWidget {
   const HomeAdmin({super.key});
@@ -33,7 +34,7 @@ class _HomeAdminState extends State<HomeAdmin> {
                   // Centered Title
                   Expanded(
                     child: Text(
-                      "Admin Panel",
+                      "Home Admin",
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.black,
@@ -118,7 +119,39 @@ class _HomeAdminState extends State<HomeAdmin> {
                           ),
                         ),
                         child: const Text(
-                          "Monunment Tickets",
+                          "Monument Tickets",
+                          style: TextStyle(
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30.0),
+
+                      // QR Validation Button
+                      ElevatedButton(
+                        onPressed: () {
+                          // Navigate to QR Validation Page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QRValidationPage(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff6351ec),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 20.0,
+                            horizontal: 40.0,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                        child: const Text(
+                          "Validate QR Code",
                           style: TextStyle(
                             fontSize: 24.0,
                             fontWeight: FontWeight.bold,

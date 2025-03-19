@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:monumentbookingapp/services/database.dart';
 
 class TicketEvent extends StatefulWidget {
@@ -79,83 +78,85 @@ class _TicketEventState extends State<TicketEvent> {
                                 ),
                               ),
                               const SizedBox(width: 20.0),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    ds["Event"],
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 19.0,
-                                      fontWeight: FontWeight.w500,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      ds["Event"],
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 5.0),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.calendar_month,
-                                        color: Colors.blue,
-                                      ),
-                                      const SizedBox(width: 5.0),
-                                      Text(
-                                        ds["Date"],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 19.0,
-                                          fontWeight: FontWeight.w500,
+                                    const SizedBox(height: 5.0),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.calendar_month,
+                                          color: Colors.blue,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 5.0),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.person,
-                                        color: Colors.blue,
-                                      ),
-                                      const SizedBox(width: 5.0),
-                                      Text(
-                                        ds["Name"],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 19.0,
-                                          fontWeight: FontWeight.w500,
+                                        const SizedBox(width: 5.0),
+                                        Text(
+                                          ds["Date"],
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.group,
-                                          color: Colors.blue),
-                                      const SizedBox(width: 10.0),
-                                      Text(
-                                        ds["Number"],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 19.0,
-                                          fontWeight: FontWeight.w500,
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5.0),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person,
+                                          color: Colors.blue,
                                         ),
-                                      ),
-                                      const SizedBox(width: 10.0),
-                                      const Icon(
-                                        Icons.monetization_on,
-                                        color: Colors.blue,
-                                      ),
-                                      const SizedBox(width: 10.0),
-                                      Text(
-                                        "\$" + ds["Total"],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold,
+                                        const SizedBox(width: 5.0),
+                                        Text(
+                                          ds["Name"],
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.group,
+                                            color: Colors.blue),
+                                        const SizedBox(width: 10.0),
+                                        Text(
+                                          ds["Number"],
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10.0),
+                                        const Icon(
+                                          Icons.monetization_on,
+                                          color: Colors.blue,
+                                        ),
+                                        const SizedBox(width: 10.0),
+                                        Text(
+                                          "\$" + ds["Total"],
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

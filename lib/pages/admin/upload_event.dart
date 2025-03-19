@@ -364,20 +364,23 @@ class _UploadEventState extends State<UploadEvent> {
                       });
                     });
                   },
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: const Color(0xff6351ec),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    width: 200,
-                    child: const Center(
-                      child: Text(
-                        "Upload",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22.0,
-                          fontWeight: FontWeight.bold,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color(0xff6351ec),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      width: 200,
+                      child: const Center(
+                        child: Text(
+                          "Upload",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

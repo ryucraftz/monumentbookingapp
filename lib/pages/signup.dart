@@ -18,6 +18,7 @@ class _SignUpState extends State<SignUp> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min, // Ensure the Column doesn't expand
             children: [
               // Image
               Image.asset("images/onboarding.png"),
@@ -33,7 +34,7 @@ class _SignUpState extends State<SignUp> {
                 ),
               ),
               const Text(
-                "Monument Booking",
+                "Monument Seeing",
                 style: TextStyle(
                   color: Color(0xff6351ec),
                   fontSize: 30.0,
@@ -54,17 +55,17 @@ class _SignUpState extends State<SignUp> {
               const SizedBox(height: 50.0),
 
               // Google Sign-Up Button
-              GestureDetector(
-                onTap: () {
-                  AuthMethods().signInWithGoogle(context);
-                },
-                child: Container(
-                  height: 70,
-                  margin: const EdgeInsets.only(left: 30.0, right: 30.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff6351ec),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
+              Container(
+                height: 70,
+                margin: const EdgeInsets.only(left: 30.0, right: 30.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xff6351ec),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    AuthMethods().signInWithGoogle(context);
+                  },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -74,9 +75,9 @@ class _SignUpState extends State<SignUp> {
                         width: 30,
                         fit: BoxFit.cover,
                       ),
-                      const SizedBox(width: 20.0),
+                      const SizedBox(width: 10.0),
                       const Text(
-                        "Sign up with Google",
+                        "Sign Up",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -96,7 +97,8 @@ class _SignUpState extends State<SignUp> {
                   // Navigate to the AdminLogin page
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AdminLogin()),
+                    MaterialPageRoute(
+                        builder: (context) => const AdminLogin()),
                   );
                 },
                 child: const Text(
@@ -109,6 +111,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
               ),
+              const SizedBox(height: 30.0), // Add extra space at the bottom
             ],
           ),
         ),
