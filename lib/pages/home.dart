@@ -19,6 +19,8 @@ class _HomeState extends State<Home> {
   Stream? eventStream;
   int eventnumber = 0;
   String? _currentCity, name;
+  TextEditingController searchController = TextEditingController();
+  String searchQuery = "";
 
   getthesahredpref() async {
     name = await SharedPreferenceHelper().getUserName();
@@ -77,6 +79,41 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  Widget searchBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: TextField(
+        controller: searchController,
+        decoration: InputDecoration(
+          hintText: "Search events...",
+          prefixIcon: const Icon(Icons.search),
+          border: InputBorder.none,
+          suffixIcon:
+              searchController.text.isNotEmpty
+                  ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        searchController.clear();
+                        searchQuery = "";
+                      });
+                    },
+                  )
+                  : null,
+        ),
+        onChanged: (value) {
+          setState(() {
+            searchQuery = value.toLowerCase();
+          });
+        },
+      ),
+    );
+  }
+
   Widget allEvents() {
     return StreamBuilder(
       stream: eventStream,
@@ -85,8 +122,7 @@ class _HomeState extends State<Home> {
             ? ListView.builder(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
-              physics:
-                  NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: snapshot.data.docs.length,
               itemBuilder: (context, index) {
                 DocumentSnapshot ds = snapshot.data.docs[index];
@@ -101,7 +137,16 @@ class _HomeState extends State<Home> {
                 DateTime currentDate = DateTime.now();
                 bool hasPassed = currentDate.isAfter(parsedDate);
 
-                return hasPassed
+                // Check if the event matches the search query
+                bool matchesSearch =
+                    searchQuery.isEmpty ||
+                    ds["Name"].toString().toLowerCase().contains(searchQuery) ||
+                    ds["Location"].toString().toLowerCase().contains(
+                      searchQuery,
+                    ) ||
+                    formattedDate.toLowerCase().contains(searchQuery);
+
+                return hasPassed || !matchesSearch
                     ? Container()
                     : GestureDetector(
                       onTap: () {
@@ -304,22 +349,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       SizedBox(height: 20.0),
-                      Container(
-                        margin: EdgeInsets.only(right: 20.0),
-                        padding: EdgeInsets.only(left: 20.0),
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            suffixIcon: Icon(Icons.search_outlined),
-                            border: InputBorder.none,
-                            hintText: "Search a Monument",
-                          ),
-                        ),
-                      ),
+                      searchBar(),
                       SizedBox(height: 20.0),
                       Container(
                         height: 100,
@@ -333,7 +363,7 @@ class _HomeState extends State<Home> {
                                   MaterialPageRoute(
                                     builder:
                                         (context) => CategoriesEvent(
-                                          eventcategory: "Cultural",
+                                          eventcategory: "Mumbai",
                                         ),
                                   ),
                                 );
@@ -359,13 +389,13 @@ class _HomeState extends State<Home> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Image.asset(
-                                          "images/cultural.png",
+                                          "images/mumbai.png",
                                           height: 30,
                                           width: 30,
                                           fit: BoxFit.cover,
                                         ),
                                         Text(
-                                          "Cultural",
+                                          "Mumbai",
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20.0,
@@ -385,7 +415,7 @@ class _HomeState extends State<Home> {
                                   MaterialPageRoute(
                                     builder:
                                         (context) => CategoriesEvent(
-                                          eventcategory: "Natural",
+                                          eventcategory: "Pune",
                                         ),
                                   ),
                                 );
@@ -411,13 +441,13 @@ class _HomeState extends State<Home> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Image.asset(
-                                          "images/natural.png",
+                                          "images/pune.png",
                                           height: 30,
                                           width: 30,
                                           fit: BoxFit.cover,
                                         ),
                                         Text(
-                                          "Natural",
+                                          "Pune",
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20.0,
@@ -437,7 +467,7 @@ class _HomeState extends State<Home> {
                                   MaterialPageRoute(
                                     builder:
                                         (context) => CategoriesEvent(
-                                          eventcategory: "Mixed",
+                                          eventcategory: "Banglore",
                                         ),
                                   ),
                                 );
@@ -463,13 +493,13 @@ class _HomeState extends State<Home> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Image.asset(
-                                          "images/mixed.png",
+                                          "images/banglore.png",
                                           height: 30,
                                           width: 30,
                                           fit: BoxFit.cover,
                                         ),
                                         Text(
-                                          "Mixed",
+                                          "Banglore",
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20.0,
@@ -516,5 +546,11 @@ class _HomeState extends State<Home> {
                 ),
               ),
     );
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }

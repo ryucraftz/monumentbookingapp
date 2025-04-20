@@ -19,7 +19,7 @@ class _UploadEventState extends State<UploadEvent> {
   TextEditingController pricecontroller = TextEditingController();
   TextEditingController locationcontroller = TextEditingController();
   TextEditingController detailcontroller = TextEditingController();
-  final List<String> eventcategory = ["Cultural", "Natural", "Mixed"];
+  final List<String> eventcategory = ["Mumbai", "Pune", "Banglore"];
   String? value;
   final ImagePicker _picker = ImagePicker();
   File? selectedImage;

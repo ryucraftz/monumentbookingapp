@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: SignUp(), // Set the initial screen to SignUp
+      routes: {'/HomeAdmin': (context) => const HomeAdmin()},
     );
   }
 }

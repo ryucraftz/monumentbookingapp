@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:monumentbookingapp/services/auth.dart';
 
 class AdminLogin extends StatefulWidget {
   const AdminLogin({super.key});
@@ -10,9 +9,24 @@ class AdminLogin extends StatefulWidget {
 
 class _AdminLoginState extends State<AdminLogin> {
   // Controllers for the text fields
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthMethods _authMethods = AuthMethods();
+
+  void _login() {
+    if (_usernameController.text.trim() == "kirito" &&
+        _passwordController.text.trim() == "tacos") {
+      // Navigate to admin dashboard or home page
+      Navigator.pushReplacementNamed(context, '/HomeAdmin');
+    } else {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid username or password'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +54,7 @@ class _AdminLoginState extends State<AdminLogin> {
 
             // Username TextField
             TextField(
-              controller: _emailController,
+              controller: _usernameController,
               decoration: const InputDecoration(
                 hintText: "Enter username",
                 border: OutlineInputBorder(),
@@ -63,23 +77,17 @@ class _AdminLoginState extends State<AdminLogin> {
 
             // Login Button
             ElevatedButton(
-              onPressed: () {
-                _authMethods.adminLogin(
-                  email: _emailController.text.trim(),
-                  password: _passwordController.text.trim(),
-                  context: context,
-                );
-              },
+              onPressed: _login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xff6351ec), // Button color
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 50,
+                  vertical: 15,
+                ),
               ),
               child: const Text(
                 "Login",
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 18.0, color: Colors.white),
               ),
             ),
           ],
@@ -91,7 +99,7 @@ class _AdminLoginState extends State<AdminLogin> {
   @override
   void dispose() {
     // Dispose the controllers when the widget is removed
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
