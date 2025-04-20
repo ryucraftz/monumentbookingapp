@@ -79,23 +79,215 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body:
+          _currentCity == null
+              ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xff6351ec)),
+                ),
+              )
+              : SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Container(
+                  padding: const EdgeInsets.only(top: 50.0, left: 20.0),
+                  width: MediaQuery.of(context).size.width,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xffe3e6ff),
+                        Color(0xfff1f3ff),
+                        Colors.white,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Location and Greeting Section
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            color: Color(0xff6351ec),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _currentCity!,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20.0),
+                      Text(
+                        "Hello, $name!",
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10.0),
+                      Text(
+                        "There are $eventnumber monuments\naround your location.",
+                        style: const TextStyle(
+                          color: Color(0xff6351ec),
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+
+                      // Search Bar
+                      Hero(
+                        tag: 'searchBar',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: searchBar(),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+
+                      // Categories Section
+                      SizedBox(
+                        height: 120,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          children: [
+                            _buildCategoryCard("Mumbai", "images/mumbai.png"),
+                            const SizedBox(width: 20.0),
+                            _buildCategoryCard("Pune", "images/pune.png"),
+                            const SizedBox(width: 20.0),
+                            _buildCategoryCard(
+                              "Banglore",
+                              "images/banglore.png",
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Available Bookings Section
+                      Padding(
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Available Bookings",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 22.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                // Add see all functionality
+                              },
+                              child: const Text(
+                                "See all",
+                                style: TextStyle(
+                                  color: Color(0xff6351ec),
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      allEvents(),
+                    ],
+                  ),
+                ),
+              ),
+    );
+  }
+
+  Widget _buildCategoryCard(String city, String imagePath) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoriesEvent(eventcategory: city),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 5.0),
+        child: Material(
+          elevation: 3.0,
+          borderRadius: BorderRadius.circular(15),
+          child: Container(
+            width: 100,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  imagePath,
+                  height: 30,
+                  width: 30,
+                  fit: BoxFit.cover,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  city,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget searchBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: TextField(
         controller: searchController,
         decoration: InputDecoration(
-          hintText: "Search events...",
-          prefixIcon: const Icon(Icons.search),
+          hintText: "Search monuments...",
+          prefixIcon: const Icon(Icons.search, color: Color(0xff6351ec)),
           border: InputBorder.none,
           suffixIcon:
               searchController.text.isNotEmpty
                   ? IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: const Icon(Icons.clear, color: Color(0xff6351ec)),
                     onPressed: () {
                       setState(() {
                         searchController.clear();
@@ -118,433 +310,183 @@ class _HomeState extends State<Home> {
     return StreamBuilder(
       stream: eventStream,
       builder: (context, AsyncSnapshot snapshot) {
-        return snapshot.hasData
-            ? ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: snapshot.data.docs.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot ds = snapshot.data.docs[index];
-                if (_currentCity == ds["Location"]) {
-                  eventnumber = eventnumber + 1;
-                }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xff6351ec)),
+            ),
+          );
+        }
 
-                String inputDate = ds["Date"];
-                DateTime parsedDate = DateTime.parse(inputDate);
-                String formattedDate = DateFormat('MMM, dd').format(parsedDate);
+        if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
+          return const Center(
+            child: Text(
+              "No events available",
+              style: TextStyle(color: Colors.grey, fontSize: 18),
+            ),
+          );
+        }
 
-                DateTime currentDate = DateTime.now();
-                bool hasPassed = currentDate.isAfter(parsedDate);
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: snapshot.data.docs.length,
+          itemBuilder: (context, index) {
+            DocumentSnapshot ds = snapshot.data.docs[index];
+            if (_currentCity == ds["Location"]) {
+              eventnumber = eventnumber + 1;
+            }
 
-                // Check if the event matches the search query
-                bool matchesSearch =
-                    searchQuery.isEmpty ||
-                    ds["Name"].toString().toLowerCase().contains(searchQuery) ||
-                    ds["Location"].toString().toLowerCase().contains(
-                      searchQuery,
-                    ) ||
-                    formattedDate.toLowerCase().contains(searchQuery);
+            String inputDate = ds["Date"];
+            DateTime parsedDate = DateTime.parse(inputDate);
+            String formattedDate = DateFormat('MMM, dd').format(parsedDate);
 
-                return hasPassed || !matchesSearch
-                    ? Container()
-                    : GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => DetailPage(
-                                  date: ds["Date"],
-                                  detail: ds["Detail"],
-                                  image: ds["Image"],
-                                  name: ds["Name"],
-                                  location: ds["Location"],
-                                  price: ds["Price"],
-                                ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.only(right: 20.0),
-                        margin: EdgeInsets.only(bottom: 20.0),
-                        child: Column(
-                          mainAxisSize:
-                              MainAxisSize
-                                  .min, // Ensure the Column doesn't expand
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    ds["Image"], // Use the URL from Firestore
-                                    height: 200,
-                                    width: MediaQuery.of(context).size.width,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (
-                                      BuildContext context,
-                                      Widget child,
-                                      ImageChunkEvent? loadingProgress,
-                                    ) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value:
-                                              loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes!
-                                                  : null,
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (
-                                      BuildContext context,
-                                      Object exception,
-                                      StackTrace? stackTrace,
-                                    ) {
-                                      return Center(
-                                        child: Icon(
-                                          Icons.error,
-                                          color: Colors.red,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(
-                                    left: 10.0,
-                                    top: 10.0,
-                                  ),
-                                  width: 50.0,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      formattedDate,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+            DateTime currentDate = DateTime.now();
+            bool hasPassed = currentDate.isAfter(parsedDate);
+
+            // Check if the event matches the search query
+            bool matchesSearch =
+                searchQuery.isEmpty ||
+                ds["Name"].toString().toLowerCase().contains(searchQuery) ||
+                ds["Location"].toString().toLowerCase().contains(searchQuery) ||
+                formattedDate.toLowerCase().contains(searchQuery);
+
+            return hasPassed || !matchesSearch
+                ? Container()
+                : GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => DetailPage(
+                              date: ds["Date"],
+                              detail: ds["Detail"],
+                              image: ds["Image"],
+                              name: ds["Name"],
+                              location: ds["Location"],
+                              price: ds["Price"],
                             ),
-                            SizedBox(height: 5.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  ds["Name"],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(right: 20.0),
+                    margin: EdgeInsets.only(bottom: 20.0),
+                    child: Column(
+                      mainAxisSize:
+                          MainAxisSize.min, // Ensure the Column doesn't expand
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                ds["Image"], // Use the URL from Firestore
+                                height: 200,
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (
+                                  BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return Center(
+                                    child: Icon(Icons.error, color: Colors.red),
+                                  );
+                                },
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(left: 10.0, top: 10.0),
+                              width: 50.0,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  formattedDate,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 24.0,
+                                    fontSize: 18.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 20.0),
-                                  child: Text(
-                                    "\$" + ds["Price"],
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Color(0xff6351ec),
-                                      fontSize: 24.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Icon(Icons.location_on),
-                                Text(
-                                  ds["Location"],
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-              },
-            )
-            : Container();
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body:
-          _currentCity == null
-              ? Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.only(top: 50.0, left: 20.0),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xffe3e6ff),
-                        Color(0xfff1f3ff),
-                        Colors.white,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.location_on_outlined),
-                          Text(
-                            _currentCity!,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                      Text(
-                        "Hello, " + name!,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        "There are 3 monuments\naround your location.",
-                        style: TextStyle(
-                          color: Color(0xff6351ec),
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 20.0),
-                      searchBar(),
-                      SizedBox(height: 20.0),
-                      Container(
-                        height: 100,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
+                        SizedBox(height: 5.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => CategoriesEvent(
-                                          eventcategory: "Mumbai",
-                                        ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                margin: EdgeInsets.only(bottom: 5.0),
-                                child: Material(
-                                  elevation: 3.0,
-                                  borderRadius: BorderRadius.circular(
-                                    10,
-                                  ), // Set border radius here
-                                  child: Container(
-                                    width: 100,
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(
-                                        10,
-                                      ), // Set border radius here
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Image.asset(
-                                          "images/mumbai.png",
-                                          height: 30,
-                                          width: 30,
-                                          fit: BoxFit.cover,
-                                        ),
-                                        Text(
-                                          "Mumbai",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 20.0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 30.0),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => CategoriesEvent(
-                                          eventcategory: "Pune",
-                                        ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                margin: EdgeInsets.only(bottom: 5.0),
-                                child: Material(
-                                  elevation: 3.0,
-                                  borderRadius: BorderRadius.circular(
-                                    10,
-                                  ), // Set border radius here
-                                  child: Container(
-                                    width: 100,
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(
-                                        10,
-                                      ), // Set border radius here
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Image.asset(
-                                          "images/pune.png",
-                                          height: 30,
-                                          width: 30,
-                                          fit: BoxFit.cover,
-                                        ),
-                                        Text(
-                                          "Pune",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 20.0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 30),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => CategoriesEvent(
-                                          eventcategory: "Banglore",
-                                        ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                margin: EdgeInsets.only(bottom: 5.0),
-                                child: Material(
-                                  elevation: 3.0,
-                                  borderRadius: BorderRadius.circular(
-                                    10,
-                                  ), // Set border radius here
-                                  child: Container(
-                                    width: 100,
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(
-                                        10,
-                                      ), // Set border radius here
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Image.asset(
-                                          "images/banglore.png",
-                                          height: 30,
-                                          width: 30,
-                                          fit: BoxFit.cover,
-                                        ),
-                                        Text(
-                                          "Banglore",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 20.0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Available Bookings",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 22.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 20.0),
-                            child: Text(
-                              "See all",
+                            Text(
+                              ds["Name"],
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 18.0,
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 20.0),
+                              child: Text(
+                                "\$" + ds["Price"],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xff6351ec),
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on),
+                            Text(
+                              ds["Location"],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 22.0,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                      allEvents(), // Display the list of events
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
+                );
+          },
+        );
+      },
     );
   }
 
