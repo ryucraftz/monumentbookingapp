@@ -4,11 +4,12 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'package:monumentbookingapp/services/database.dart';
 import 'package:monumentbookingapp/services/shared_pref.dart';
-import 'package:qr_flutter/qr_flutter.dart'; // Import the qr_flutter package
+import 'package:qr_flutter/qr_flutter.dart';
 
 class DetailPage extends StatefulWidget {
   final String image, name, location, date, detail, price;
-  DetailPage({
+  const DetailPage({
+    super.key,
     required this.date,
     required this.detail,
     required this.image,
@@ -21,359 +22,610 @@ class DetailPage extends StatefulWidget {
   State<DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> {
+class _DetailPageState extends State<DetailPage>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic>? paymentIntent;
   int ticket = 1;
   int total = 0;
   String? name, image, id;
-  String? qrData; // Store the QR code data
+  String? qrData;
+  bool _isLoading = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
-    total = int.parse(widget.price);
-    ontheload();
     super.initState();
+    total = int.parse(widget.price);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _animationController.forward();
+    ontheload();
   }
 
   ontheload() async {
+    setState(() => _isLoading = true);
     name = await SharedPreferenceHelper().getUserName();
     image = await SharedPreferenceHelper().getUserImage();
     id = await SharedPreferenceHelper().getUserId();
-    setState(() {});
+    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Image.network(
-                  widget.image,
-                  height: MediaQuery.of(context).size.height / 2,
-                  width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (
-                    BuildContext context,
-                    Widget child,
-                    ImageChunkEvent? loadingProgress,
-                  ) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    );
-                  },
-                  errorBuilder: (
-                    BuildContext context,
-                    Object exception,
-                    StackTrace? stackTrace,
-                  ) {
-                    return Center(child: Text('Failed to load image'));
-                  },
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height / 2,
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // Main Content
+          CustomScrollView(
+            slivers: [
+              // App Bar with Image
+              SliverAppBar(
+                expandedHeight: MediaQuery.of(context).size.height * 0.5,
+                floating: false,
+                pinned: true,
+                backgroundColor: const Color(0xff6351ec),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
+                      // Monument Image
+                      Image.network(
+                        widget.image,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xff6351ec),
+                                ),
+                              ),
+                            ),
+                          );
                         },
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          margin: EdgeInsets.only(top: 40.0, left: 20.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_outlined,
-                            color: Colors.black,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 50,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      // Gradient Overlay
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.7),
+                            ],
                           ),
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.only(left: 20.0),
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(color: Colors.black45),
+                      // Monument Info
+                      Positioned(
+                        bottom: 20,
+                        left: 20,
+                        right: 20,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               widget.name,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 25.0,
+                                fontSize: 28,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            const SizedBox(height: 10),
                             Row(
                               children: [
-                                Icon(Icons.calendar_month, color: Colors.white),
-                                SizedBox(width: 10.0),
-                                Flexible(
-                                  child: Text(
-                                    widget.date,
-                                    style: TextStyle(
-                                      color: Color.fromARGB(211, 255, 255, 255),
-                                      fontSize: 19.0,
-                                    ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        widget.date,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(width: 20.0),
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 10.0),
-                                Flexible(
-                                  child: Text(
-                                    widget.location,
-                                    style: TextStyle(
-                                      color: Color.fromARGB(211, 255, 255, 255),
-                                      fontSize: 19.0,
-                                    ),
+                                const SizedBox(width: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        widget.location,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20),
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 20.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0),
-              child: Text(
-                "About Monument",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(height: 10.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0),
-              child: Text(
-                widget.detail,
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            SizedBox(height: 30.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Number of Tickets",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
+                leading: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Color(0xff6351ec),
                     ),
                   ),
-                  SizedBox(width: 40),
-                  Container(
-                    width: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black54, width: 2.0),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                ),
+              ),
+
+              // Content
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            total = total + int.parse(widget.price);
-                            ticket = ticket + 1;
-                            setState(() {});
-                          },
-                          child: Text(
-                            "+",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 25.0,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          ticket.toString(),
+                        // About Section
+                        const Text(
+                          "About Monument",
                           style: TextStyle(
-                            color: Color(0xff6351ec),
-                            fontSize: 25.0,
+                            color: Colors.black87,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            if (ticket > 1) {
-                              total = total - int.parse(widget.price);
-                              ticket = ticket - 1;
-                              setState(() {});
-                            }
-                          },
+                        const SizedBox(height: 15),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
                           child: Text(
-                            "-",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 25.0,
+                            widget.detail,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 16,
+                              height: 1.5,
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        // Ticket Selection
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Number of Tickets",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.1),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      if (ticket > 1) {
+                                        setState(() {
+                                          ticket--;
+                                          total =
+                                              ticket * int.parse(widget.price);
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xff6351ec,
+                                        ).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.remove,
+                                        color: Color(0xff6351ec),
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: Text(
+                                      ticket.toString(),
+                                      style: const TextStyle(
+                                        color: Color(0xff6351ec),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        ticket++;
+                                        total =
+                                            ticket * int.parse(widget.price);
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xff6351ec,
+                                        ).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.add,
+                                        color: Color(0xff6351ec),
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 100), // Space for bottom bar
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Bottom Bar
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Total Amount",
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                        Text(
+                          "\$$total",
+                          style: const TextStyle(
+                            color: Color(0xff6351ec),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20.0),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Amount : \$" + total.toString(),
-                    style: TextStyle(
-                      color: Color(0xff6351ec),
-                      fontSize: 23.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(width: 20.0),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        print("Book Now button clicked");
-                        makePayment(total.toString());
-                      },
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Color(0xff6351ec),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Book Now",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => makePayment(total.toString()),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff6351ec),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
+                          elevation: 0,
                         ),
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Text(
+                                  "Book Now",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Future<void> makePayment(String amount) async {
     try {
-      print("makePayment() started with amount: $amount");
+      setState(() => _isLoading = true);
       paymentIntent = await createPaymentIntent(amount, 'USD');
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntent?['client_secret'],
           style: ThemeMode.dark,
-          merchantDisplayName: 'Your Merchant',
+          merchantDisplayName: 'Monument Booking',
         ),
       );
       displayPaymentSheet();
     } catch (e) {
       print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Something went wrong. Please try again.'),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
- void displayPaymentSheet() async {
-  try {
-    await Stripe.instance.presentPaymentSheet();
-
-    // Generate QR code data
-    qrData = "Event: ${widget.name}, Location: ${widget.location}, Date: ${widget.date}, Tickets: $ticket, Total: \$$total";
-
-    Map<String, dynamic> bookingdetail = {
-      "Number": ticket.toString(),
-      "Total": total.toString(),
-      "Event": widget.name,
-      "Location": widget.location,
-      "Date": widget.date,
-      "Name": name,
-      "Image": image,
-      "EventImage": widget.image,
-      "QRData": qrData, // Add QR code data to booking details
-    };
-
-    await DatabaseMethods().addUserBooking(bookingdetail, id!).then((
-      value,
-    ) async {
-      await DatabaseMethods().addAdminTickets(bookingdetail);
-    });
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(height: 10),
-              Text("Payment Successful"),
-              SizedBox(height: 20),
-              QrImageView(
-                data: qrData!,
-                version: QrVersions.auto,
-                size: 200.0,
-              ),
-              SizedBox(height: 20),
-              Text("Scan this QR code for entry"),
-            ],
-          ),
-        ),
-      ),
-    );
-    paymentIntent = null;
-  } catch (e) {
-    print("Error: $e");
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(content: Text("Payment Cancelled")),
-    );
-  }
-}
-
-  Future<Map<String, dynamic>> createPaymentIntent(String amount, String currency) async {
+  void displayPaymentSheet() async {
     try {
-      print("Creating Payment Intent with amount: $amount, currency: $currency");
+      await Stripe.instance.presentPaymentSheet();
 
+      qrData =
+          "Event: ${widget.name}, Location: ${widget.location}, Date: ${widget.date}, Tickets: $ticket, Total: \$$total";
+
+      Map<String, dynamic> bookingdetail = {
+        "Number": ticket.toString(),
+        "Total": total.toString(),
+        "Event": widget.name,
+        "Location": widget.location,
+        "Date": widget.date,
+        "Name": name,
+        "Image": image,
+        "EventImage": widget.image,
+        "QRData": qrData,
+      };
+
+      await DatabaseMethods().addUserBooking(bookingdetail, id!).then((
+        value,
+      ) async {
+        await DatabaseMethods().addAdminTickets(bookingdetail);
+      });
+
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder:
+            (_) => Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 60,
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "Payment Successful",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: QrImageView(
+                        data: qrData!,
+                        version: QrVersions.auto,
+                        size: 200,
+                        backgroundColor: Colors.white,
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Color(0xff6351ec),
+                        ),
+                        dataModuleStyle: const QrDataModuleStyle(
+                          dataModuleShape: QrDataModuleShape.square,
+                          color: Color(0xff6351ec),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Scan this QR code for entry",
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff6351ec),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        minimumSize: const Size(double.infinity, 45),
+                      ),
+                      child: const Text("Done", style: TextStyle(fontSize: 16)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      );
+      paymentIntent = null;
+    } catch (e) {
+      print("Error: $e");
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder:
+            (_) => Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 60,
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "Payment Cancelled",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        minimumSize: const Size(double.infinity, 45),
+                      ),
+                      child: const Text(
+                        "Close",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> createPaymentIntent(
+    String amount,
+    String currency,
+  ) async {
+    try {
       Map<String, dynamic> body = {
         'amount': calculateAmount(amount),
         'currency': currency,
@@ -383,29 +635,32 @@ class _DetailPageState extends State<DetailPage> {
       var response = await http.post(
         Uri.parse('https://api.stripe.com/v1/payment_intents'),
         headers: {
-          'Authorization': 'Bearer sk_test_51R36tuKXoPvqIoMiYseEx6lu5JPg3C9sy7H3nMVtHHlZylFHqjVrSKpSdaUiUZMylf7RVr5vyd2b8bgmezphVnnI00zljXseS6', // 🔥 Ensure this is correct!
+          'Authorization':
+              'Bearer sk_test_51R36tuKXoPvqIoMiYseEx6lu5JPg3C9sy7H3nMVtHHlZylFHqjVrSKpSdaUiUZMylf7RVr5vyd2b8bgmezphVnnI00zljXseS6',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: body,
       );
 
-      print("Stripe API Response Status: ${response.statusCode}");
-      print("Stripe API Response Body: ${response.body}");
-
       if (response.statusCode != 200) {
-        print("Error: Failed to create payment intent!");
-        return {};
+        throw 'Failed to create payment intent!';
       }
 
       return jsonDecode(response.body);
     } catch (err) {
-      print('Error in createPaymentIntent(): ${err.toString()}'); // ❌ Logs any errors
-      return {};
+      print('Error in createPaymentIntent(): $err');
+      rethrow;
     }
   }
 
   String calculateAmount(String amount) {
     final calculatedAmount = (int.parse(amount) * 100);
     return calculatedAmount.toString();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
