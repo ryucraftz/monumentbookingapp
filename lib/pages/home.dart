@@ -7,6 +7,7 @@ import 'package:monumentbookingapp/pages/categories_event.dart';
 import 'package:monumentbookingapp/pages/detail_page.dart';
 import 'package:monumentbookingapp/services/database.dart';
 import 'package:monumentbookingapp/services/shared_pref.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,12 +16,15 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Stream? eventStream;
   int eventnumber = 0;
   String? _currentCity, name;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   getthesahredpref() async {
     name = await SharedPreferenceHelper().getUserName();
@@ -75,12 +79,41 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    ontheload();
     super.initState();
+    ontheload();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 600;
+
     return Scaffold(
       body:
           _currentCity == null
@@ -92,8 +125,12 @@ class _HomeState extends State<Home> {
               : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Container(
-                  padding: const EdgeInsets.only(top: 50.0, left: 20.0),
-                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 20.0,
+                    left: 20.0,
+                    right: 20.0,
+                  ),
+                  width: screenWidth,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -111,40 +148,50 @@ class _HomeState extends State<Home> {
                       // Location and Greeting Section
                       Row(
                         children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            color: Color(0xff6351ec),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xff6351ec).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.location_on_outlined,
+                              color: Color(0xff6351ec),
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _currentCity!,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.w500,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _currentCity!,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 24.0),
                       Text(
                         "Hello, $name!",
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black,
-                          fontSize: 25.0,
+                          fontSize: isSmallScreen ? 22.0 : 25.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 10.0),
+                      const SizedBox(height: 12.0),
                       Text(
                         "There are $eventnumber monuments\naround your location.",
-                        style: const TextStyle(
-                          color: Color(0xff6351ec),
-                          fontSize: 25.0,
+                        style: TextStyle(
+                          color: const Color(0xff6351ec),
+                          fontSize: isSmallScreen ? 20.0 : 25.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 24.0),
 
                       // Search Bar
                       Hero(
@@ -154,19 +201,19 @@ class _HomeState extends State<Home> {
                           child: searchBar(),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 24.0),
 
                       // Categories Section
                       SizedBox(
-                        height: 120,
+                        height: isSmallScreen ? 100 : 120,
                         child: ListView(
                           scrollDirection: Axis.horizontal,
                           physics: const BouncingScrollPhysics(),
                           children: [
                             _buildCategoryCard("Mumbai", "images/mumbai.png"),
-                            const SizedBox(width: 20.0),
+                            const SizedBox(width: 16.0),
                             _buildCategoryCard("Pune", "images/pune.png"),
-                            const SizedBox(width: 20.0),
+                            const SizedBox(width: 16.0),
                             _buildCategoryCard(
                               "Banglore",
                               "images/banglore.png",
@@ -174,39 +221,55 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24.0),
 
                       // Available Bookings Section
-                      Padding(
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Available Bookings",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.bold,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Available Bookings",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: isSmallScreen ? 20.0 : 22.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Add see all functionality
+                            },
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                // Add see all functionality
-                              },
-                              child: const Text(
-                                "See all",
-                                style: TextStyle(
-                                  color: Color(0xff6351ec),
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w500,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "See all",
+                                  style: TextStyle(
+                                    color: const Color(0xff6351ec),
+                                    fontSize: isSmallScreen ? 14.0 : 16.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.arrow_forward,
+                                  color: Color(0xff6351ec),
+                                  size: 16,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 16.0),
                       allEvents(),
                     ],
                   ),
@@ -232,26 +295,37 @@ class _HomeState extends State<Home> {
           borderRadius: BorderRadius.circular(15),
           child: Container(
             width: 100,
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: const Color(0xff6351ec).withOpacity(0.1),
+                width: 1,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  imagePath,
-                  height: 30,
-                  width: 30,
-                  fit: BoxFit.cover,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff6351ec).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    imagePath,
+                    height: 24,
+                    width: 24,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   city,
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -282,8 +356,16 @@ class _HomeState extends State<Home> {
         controller: searchController,
         decoration: InputDecoration(
           hintText: "Search monuments...",
-          prefixIcon: const Icon(Icons.search, color: Color(0xff6351ec)),
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          prefixIcon: Container(
+            padding: const EdgeInsets.all(12),
+            child: const Icon(Icons.search, color: Color(0xff6351ec)),
+          ),
           border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
           suffixIcon:
               searchController.text.isNotEmpty
                   ? IconButton(
@@ -306,6 +388,26 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future<void> _openGoogleMaps(String monumentName, String location) async {
+    final query = Uri.encodeComponent('$monumentName $location');
+    final url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$query',
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open Google Maps'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget allEvents() {
     return StreamBuilder(
       stream: eventStream,
@@ -319,10 +421,26 @@ class _HomeState extends State<Home> {
         }
 
         if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
-          return const Center(
-            child: Text(
-              "No events available",
-              style: TextStyle(color: Colors.grey, fontSize: 18),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.event_busy, size: 80, color: Colors.grey[400]),
+                const SizedBox(height: 20),
+                Text(
+                  "No events available",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Check back later for new events",
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                ),
+              ],
             ),
           );
         }
@@ -345,7 +463,6 @@ class _HomeState extends State<Home> {
             DateTime currentDate = DateTime.now();
             bool hasPassed = currentDate.isAfter(parsedDate);
 
-            // Check if the event matches the search query
             bool matchesSearch =
                 searchQuery.isEmpty ||
                 ds["Name"].toString().toLowerCase().contains(searchQuery) ||
@@ -354,133 +471,300 @@ class _HomeState extends State<Home> {
 
             return hasPassed || !matchesSearch
                 ? Container()
-                : GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => DetailPage(
-                              date: ds["Date"],
-                              detail: ds["Detail"],
-                              image: ds["Image"],
-                              name: ds["Name"],
-                              location: ds["Location"],
-                              price: ds["Price"],
+                : FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => DetailPage(
+                                  date: ds["Date"],
+                                  detail: ds["Detail"],
+                                  image: ds["Image"],
+                                  name: ds["Name"],
+                                  location: ds["Location"],
+                                  price: ds["Price"],
+                                ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
                             ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(right: 20.0),
-                    margin: EdgeInsets.only(bottom: 20.0),
-                    child: Column(
-                      mainAxisSize:
-                          MainAxisSize.min, // Ensure the Column doesn't expand
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
-                                ds["Image"], // Use the URL from Firestore
-                                height: 200,
-                                width: MediaQuery.of(context).size.width,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (
-                                  BuildContext context,
-                                  Widget child,
-                                  ImageChunkEvent? loadingProgress,
-                                ) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (
-                                  BuildContext context,
-                                  Object exception,
-                                  StackTrace? stackTrace,
-                                ) {
-                                  return Center(
-                                    child: Icon(Icons.error, color: Colors.red),
-                                  );
-                                },
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(left: 10.0, top: 10.0),
-                              width: 50.0,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  formattedDate,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
+                            Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  ),
+                                  child: Image.network(
+                                    ds["Image"],
+                                    height: 200,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (
+                                      context,
+                                      child,
+                                      loadingProgress,
+                                    ) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        height: 200,
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Color(0xff6351ec),
+                                                ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        height: 200,
+                                        color: Colors.grey[200],
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.grey,
+                                          size: 50,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              ds["Name"],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                Positioned(
+                                  top: 15,
+                                  left: 15,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          spreadRadius: 1,
+                                          blurRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.calendar_today,
+                                          color: Color(0xff6351ec),
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          formattedDate,
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withOpacity(0.7),
+                                        ],
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          ds["Name"],
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Expanded(
+                                              child: Text(
+                                                ds["Location"],
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                            Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                onTap:
+                                                    () => _openGoogleMaps(
+                                                      ds["Name"],
+                                                      ds["Location"],
+                                                    ),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white
+                                                        .withOpacity(0.2),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          20,
+                                                        ),
+                                                  ),
+                                                  child: const Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.map,
+                                                        color: Colors.white,
+                                                        size: 16,
+                                                      ),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        "Open Map",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(right: 20.0),
-                              child: Text(
-                                "\$" + ds["Price"],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Color(0xff6351ec),
-                                  fontSize: 24.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              padding: const EdgeInsets.all(20),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xff6351ec,
+                                      ).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.attach_money,
+                                          color: Color(0xff6351ec),
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          "${ds["Price"]}",
+                                          style: const TextStyle(
+                                            color: Color(0xff6351ec),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xff6351ec),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Text(
+                                          "Book Now",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(width: 5),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white,
+                                          size: 16,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on),
-                            Text(
-                              ds["Location"],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 );
@@ -488,11 +772,5 @@ class _HomeState extends State<Home> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
   }
 }
