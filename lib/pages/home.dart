@@ -18,7 +18,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Stream? eventStream;
-  int eventnumber = 0;
+  int eventnumber = 2;
   String? _currentCity, name;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
