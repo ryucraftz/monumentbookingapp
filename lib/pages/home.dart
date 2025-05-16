@@ -134,8 +134,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Color(0xffe3e6ff),
-                        Color(0xfff1f3ff),
+                        Color(0xFFF8F9FF),
+                        Color(0xFFF0F2FF),
                         Colors.white,
                       ],
                       begin: Alignment.topLeft,
@@ -151,12 +151,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xff6351ec).withOpacity(0.1),
+                              color: const Color(0xFF4A3FE4).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
                               Icons.location_on_outlined,
-                              color: Color(0xff6351ec),
+                              color: Color(0xFF4A3FE4),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -184,7 +184,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       ),
                       const SizedBox(height: 12.0),
                       Text(
-                        "There are $eventnumber monuments\naround your location.",
+                        "Ready to uncover stories\nbehind iconic landmarks!",
                         style: TextStyle(
                           color: const Color(0xff6351ec),
                           fontSize: isSmallScreen ? 20.0 : 25.0,
@@ -253,7 +253,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 Text(
                                   "See all",
                                   style: TextStyle(
-                                    color: const Color(0xff6351ec),
+                                    color: const Color(0xFF4A3FE4),
                                     fontSize: isSmallScreen ? 14.0 : 16.0,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -261,7 +261,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 const SizedBox(width: 4),
                                 const Icon(
                                   Icons.arrow_forward,
-                                  color: Color(0xff6351ec),
+                                  color: Color(0xFF4A3FE4),
                                   size: 16,
                                 ),
                               ],
@@ -300,7 +300,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
-                color: const Color(0xff6351ec).withOpacity(0.1),
+                color: const Color(0xFF4A3FE4).withOpacity(0.1),
                 width: 1,
               ),
             ),
@@ -310,7 +310,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xff6351ec).withOpacity(0.1),
+                    color: const Color(0xFF4A3FE4).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
@@ -359,7 +359,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           prefixIcon: Container(
             padding: const EdgeInsets.all(12),
-            child: const Icon(Icons.search, color: Color(0xff6351ec)),
+            child: const Icon(Icons.search, color: Color(0xFF4A3FE4)),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -369,7 +369,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           suffixIcon:
               searchController.text.isNotEmpty
                   ? IconButton(
-                    icon: const Icon(Icons.clear, color: Color(0xff6351ec)),
+                    icon: const Icon(Icons.clear, color: Color(0xFF4A3FE4)),
                     onPressed: () {
                       setState(() {
                         searchController.clear();
@@ -534,7 +534,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                           child: CircularProgressIndicator(
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                  Color(0xff6351ec),
+                                                  Color(0xFF4A3FE4),
                                                 ),
                                           ),
                                         ),
@@ -577,7 +577,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                       children: [
                                         const Icon(
                                           Icons.calendar_today,
-                                          color: Color(0xff6351ec),
+                                          color: Color(0xFF4A3FE4),
                                           size: 16,
                                         ),
                                         const SizedBox(width: 5),
@@ -708,7 +708,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                     ),
                                     decoration: BoxDecoration(
                                       color: const Color(
-                                        0xff6351ec,
+                                        0xFF4A3FE4,
                                       ).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -716,14 +716,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                       children: [
                                         const Icon(
                                           Icons.attach_money,
-                                          color: Color(0xff6351ec),
+                                          color: Color(0xFF4A3FE4),
                                           size: 16,
                                         ),
                                         const SizedBox(width: 5),
                                         Text(
                                           "${ds["Price"]}",
                                           style: const TextStyle(
-                                            color: Color(0xff6351ec),
+                                            color: Color(0xFF4A3FE4),
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -737,7 +737,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xff6351ec),
+                                      color: const Color(0xFF4A3FE4),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Row(

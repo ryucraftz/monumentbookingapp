@@ -12,6 +12,7 @@ import 'package:monumentbookingapp/pages/categories_event.dart';
 import 'package:monumentbookingapp/pages/home.dart';
 import 'package:monumentbookingapp/pages/signup.dart';
 import 'package:monumentbookingapp/services/data.dart'; // Assuming this is needed
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,11 +27,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Monument Booking App',
+      theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
       home: SignUp(), // Set the initial screen to SignUp
       routes: {'/HomeAdmin': (context) => const HomeAdmin()},
     );
