@@ -51,6 +51,7 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^6.0.7
   url_launcher: ^6.2.5
+  google_generative_ai: ^0.4.7
   
 
 dev_dependencies:

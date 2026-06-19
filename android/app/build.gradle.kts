@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.monumentbookingapp"
-        minSdk = 23  // Updated to support older devices
+        minSdk = flutter.minSdkVersion  // Updated to support older devices
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

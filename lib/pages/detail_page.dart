@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:monumentbookingapp/pages/ai_guide_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
@@ -467,36 +468,41 @@ class _DetailPageState extends State<DetailPage>
                     ),
                     const SizedBox(width: 20),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => makePayment(total.toString()),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff6351ec),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                      child: Semantics(
+                        button: true,
+                        label: 'Book Tickets',
+                        hint: 'Tap to proceed with payment and book tickets',
+                        child: ElevatedButton(
+                          onPressed: () => makePayment(total.toString()),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xff6351ec),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child:
-                            _isLoading
-                                ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                          child:
+                              _isLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                      strokeWidth: 2,
                                     ),
-                                    strokeWidth: 2,
+                                  )
+                                  : const Text(
+                                    "Book Now",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                )
-                                : const Text(
-                                  "Book Now",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                        ),
                       ),
                     ),
                   ],
@@ -504,7 +510,28 @@ class _DetailPageState extends State<DetailPage>
               ),
             ),
           ),
+          ),
         ],
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 100.0),
+        child: Semantics(
+          label: "Ask AI Guide about this monument",
+          child: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AIGuidePage(monumentName: widget.name),
+                ),
+              );
+            },
+            icon: const Icon(Icons.smart_toy),
+            label: const Text("AI Guide"),
+            backgroundColor: const Color(0xff6351ec),
+            foregroundColor: Colors.white,
+          ),
+        ),
       ),
     );
   }

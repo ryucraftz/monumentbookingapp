@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:monumentbookingapp/pages/scavenger_hunt_page.dart';
 import 'package:monumentbookingapp/pages/booking.dart';
 import 'package:monumentbookingapp/pages/home.dart';
 import 'package:monumentbookingapp/pages/profile.dart';
@@ -16,6 +17,7 @@ class _BottomNavState extends State<BottomNav>
   late Home home;
   late Booking booking;
   late Profile profile;
+  late ScavengerHuntPage hunt;
   int currentTabIndex = 0;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -26,7 +28,8 @@ class _BottomNavState extends State<BottomNav>
     home = Home();
     booking = Booking();
     profile = Profile();
-    pages = [home, booking, profile];
+    hunt = const ScavengerHuntPage();
+    pages = [home, booking, hunt, profile];
 
     _animationController = AnimationController(
       vsync: this,
@@ -71,7 +74,8 @@ class _BottomNavState extends State<BottomNav>
               children: [
                 _buildNavItem(0, Icons.home_rounded, "Home"),
                 _buildNavItem(1, Icons.book_rounded, "Bookings"),
-                _buildNavItem(2, Icons.person_rounded, "Profile"),
+                _buildNavItem(2, Icons.explore_rounded, "Hunt"),
+                _buildNavItem(3, Icons.person_rounded, "Profile"),
               ],
             ),
           ),
