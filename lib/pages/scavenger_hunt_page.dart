@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+import 'package:monumentbookingapp/services/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ScavengerHuntPage extends StatefulWidget {
   const ScavengerHuntPage({super.key});
@@ -14,35 +16,71 @@ class _ScavengerHuntPageState extends State<ScavengerHuntPage> {
   Position? _currentPosition;
   bool _isLoading = true;
 
-  // Mock locations for the scavenger hunt
-  final List<Map<String, dynamic>> _locations = [
-    {
-      'name': 'The Great Gate',
-      'description': 'Find the main entrance with the large arch.',
-      'lat': 27.1751, // Example coordinates (Taj Mahal Gate area)
-      'lng': 78.0421,
-      'isUnlocked': false,
-    },
-    {
-      'name': 'The Reflection Pool',
-      'description': 'Stand by the water pool that reflects the monument.',
-      'lat': 27.1750,
-      'lng': 78.0425,
-      'isUnlocked': false,
-    },
-    {
-      'name': 'The Secret Garden',
-      'description': 'Find the ancient garden behind the main building.',
-      'lat': 27.1745,
-      'lng': 78.0430,
-      'isUnlocked': false,
-    },
-  ];
+  List<Map<String, dynamic>> _locations = [];
+  Stream? _scavengerHuntStream;
 
   @override
   void initState() {
     super.initState();
+    _fetchLocations();
     _startLocationTracking();
+  }
+
+  Future<void> _fetchLocations() async {
+    _scavengerHuntStream = DatabaseMethods().getScavengerHunts();
+    _scavengerHuntStream!.listen((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        List<Map<String, dynamic>> loadedLocations = [];
+        for (var doc in snapshot.docs) {
+          loadedLocations.add({
+            'id': doc.id,
+            'name': doc['name'],
+            'description': doc['description'],
+            'lat': doc['lat'],
+            'lng': doc['lng'],
+            'isUnlocked': doc['isUnlocked'] ?? false,
+          });
+        }
+        if (mounted) {
+          setState(() {
+            _locations = loadedLocations;
+          });
+        }
+      } else {
+        // Seed default locations if empty
+        _seedDefaultLocations();
+      }
+    });
+  }
+
+  Future<void> _seedDefaultLocations() async {
+    List<Map<String, dynamic>> defaultLocs = [
+      {
+        'name': 'The Great Gate',
+        'description': 'Find the main entrance with the large arch.',
+        'lat': 27.1751,
+        'lng': 78.0421,
+        'isUnlocked': false,
+      },
+      {
+        'name': 'The Reflection Pool',
+        'description': 'Stand by the water pool that reflects the monument.',
+        'lat': 27.1750,
+        'lng': 78.0425,
+        'isUnlocked': false,
+      },
+      {
+        'name': 'The Secret Garden',
+        'description': 'Find the ancient garden behind the main building.',
+        'lat': 27.1745,
+        'lng': 78.0430,
+        'isUnlocked': false,
+      },
+    ];
+
+    for (var loc in defaultLocs) {
+      await DatabaseMethods().addScavengerHunt(loc);
+    }
   }
 
   Future<void> _startLocationTracking() async {
@@ -186,7 +224,7 @@ class _ScavengerHuntPageState extends State<ScavengerHuntPage> {
   @override
   Widget build(BuildContext context) {
     int unlockedCount = _locations.where((l) => l['isUnlocked'] == true).length;
-    double progress = unlockedCount / _locations.length;
+    double progress = _locations.isEmpty ? 0.0 : unlockedCount / _locations.length;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],

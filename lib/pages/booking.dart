@@ -28,7 +28,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
   ontheload() async {
     setState(() => _isLoading = true);
     await getthesahredpref();
-    bookingStream = await DatabaseMethods().getbookings(id!);
+    bookingStream = DatabaseMethods().getbookings(id!);
     setState(() => _isLoading = false);
   }
 

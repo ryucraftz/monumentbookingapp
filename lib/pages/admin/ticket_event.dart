@@ -42,7 +42,7 @@ class _TicketEventState extends State<TicketEvent>
 
   ontheload() async {
     setState(() => _isLoading = true);
-    ticketStream = await DatabaseMethods().getTickets();
+    ticketStream = DatabaseMethods().getTickets();
     setState(() => _isLoading = false);
   }
 

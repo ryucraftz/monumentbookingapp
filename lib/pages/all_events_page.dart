@@ -4,15 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:monumentbookingapp/pages/detail_page.dart';
 import 'package:monumentbookingapp/services/database.dart';
 
-class CategoriesEvent extends StatefulWidget {
-  final String eventcategory;
-  const CategoriesEvent({super.key, required this.eventcategory});
+class AllEventsPage extends StatefulWidget {
+  const AllEventsPage({super.key});
 
   @override
-  State<CategoriesEvent> createState() => _CategoriesEventState();
+  State<AllEventsPage> createState() => _AllEventsPageState();
 }
 
-class _CategoriesEventState extends State<CategoriesEvent>
+class _AllEventsPageState extends State<AllEventsPage>
     with SingleTickerProviderStateMixin {
   Stream? eventStream;
   late AnimationController _animationController;
@@ -37,9 +36,7 @@ class _CategoriesEventState extends State<CategoriesEvent>
 
   getontheload() async {
     setState(() => _isLoading = true);
-    eventStream = DatabaseMethods().getEventCategories(
-      widget.eventcategory,
-    );
+    eventStream = DatabaseMethods().getallEvents();
     setState(() => _isLoading = false);
   }
 
@@ -170,8 +167,8 @@ class _CategoriesEventState extends State<CategoriesEvent>
                                   height: 200,
                                   color: Colors.grey[200],
                                   child: const Icon(
-                                    Icons.error_outline,
-                                    color: Colors.red,
+                                    Icons.image_not_supported,
+                                    color: Colors.grey,
                                     size: 40,
                                   ),
                                 );
@@ -346,9 +343,9 @@ class _CategoriesEventState extends State<CategoriesEvent>
                       ),
                     ),
                     const SizedBox(width: 20),
-                    Text(
-                      widget.eventcategory,
-                      style: const TextStyle(
+                    const Text(
+                      "All Available Bookings",
+                      style: TextStyle(
                         color: Color(0xff6351ec),
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

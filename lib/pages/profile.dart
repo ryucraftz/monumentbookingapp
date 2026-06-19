@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:monumentbookingapp/pages/signup.dart';
 import 'package:monumentbookingapp/services/auth.dart';
 import 'package:monumentbookingapp/services/shared_pref.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -69,6 +70,32 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _launchEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'support@monumentbooking.com',
+      query: encodeQueryParameters(<String, String>{
+        'subject': 'Support Request from Monument Booking App',
+      }),
+    );
+    try {
+      await launchUrl(emailLaunchUri);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open email client.')),
+        );
+      }
+    }
+  }
+
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
   }
 
   @override
@@ -244,9 +271,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                   child: _buildActionRow(
                                     icon: Icons.contact_emergency,
                                     title: "Contact Us",
-                                    onTap: () {
-                                      // Add cmontact us functionality
-                                    },
+                                    onTap: _launchEmail,
                                   ),
                                 ),
                                 const SizedBox(height: 15.0),

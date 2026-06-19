@@ -444,8 +444,18 @@ class _UploadEventState extends State<UploadEvent>
 
                                       try {
                                         String id = randomAlphaNumeric(10);
+                                        
+                                        // Upload image to Firebase Storage
+                                        Reference firebaseStorageRef = FirebaseStorage.instance
+                                            .ref()
+                                            .child("monumentImages")
+                                            .child(id);
+                                        UploadTask uploadTask = firebaseStorageRef.putFile(selectedImage!);
+                                        TaskSnapshot taskSnapshot = await uploadTask;
+                                        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
                                         Map<String, dynamic> uploadevent = {
-                                          "Image": "",
+                                          "Image": downloadUrl,
                                           "Name": namecontroller.text,
                                           "Price": pricecontroller.text,
                                           "Category": value,

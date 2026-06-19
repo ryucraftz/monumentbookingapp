@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AIGuidePage extends StatefulWidget {
   final String monumentName;
@@ -14,8 +15,8 @@ class _AIGuidePageState extends State<AIGuidePage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
-  // TODO: Replace with your actual Gemini API Key from Google AI Studio
-  static const String apiKey = 'YOUR_API_KEY_HERE';
+  // Read API Key from .env file
+  String get apiKey => dotenv.env['GEMINI_API_KEY'] ?? 'YOUR_API_KEY_HERE';
   
   late final GenerativeModel _model;
   late final ChatSession _chat;

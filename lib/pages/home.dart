@@ -8,6 +8,7 @@ import 'package:monumentbookingapp/pages/detail_page.dart';
 import 'package:monumentbookingapp/services/database.dart';
 import 'package:monumentbookingapp/services/shared_pref.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:monumentbookingapp/pages/all_events_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -72,7 +73,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   void ontheload() async {
     await getthesahredpref();
-    eventStream = await DatabaseMethods().getallEvents();
+    eventStream = DatabaseMethods().getallEvents();
     _getCurrentCity();
     setState(() {});
   }
@@ -237,7 +238,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           ),
                           TextButton(
                             onPressed: () {
-                              // Add see all functionality
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AllEventsPage(),
+                                ),
+                              );
                             },
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(

@@ -13,11 +13,13 @@ import 'package:monumentbookingapp/pages/home.dart';
 import 'package:monumentbookingapp/pages/signup.dart';
 import 'package:monumentbookingapp/services/data.dart'; // Assuming this is needed
 import 'theme/app_theme.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Stripe.publishableKey = publishdkey; // Corrected method name
   await Firebase.initializeApp(); // Initialize Firebase
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 

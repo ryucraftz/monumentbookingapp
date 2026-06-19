@@ -16,8 +16,8 @@ class DatabaseMethods {
         .set(userInfoMap);
   }
 
-  Future<Stream<QuerySnapshot>> getallEvents() async {
-    return await FirebaseFirestore.instance.collection("Event").snapshots();
+  Stream<QuerySnapshot> getallEvents() {
+    return FirebaseFirestore.instance.collection("Event").snapshots();
   }
 
   Future addUserBooking(Map<String, dynamic> userInfoMap, String id) async {
@@ -34,22 +34,33 @@ class DatabaseMethods {
         .add(userInfoMap);
   }
 
-  Future<Stream<QuerySnapshot>> getbookings(String id) async {
-    return await FirebaseFirestore.instance
+  Stream<QuerySnapshot> getbookings(String id) {
+    return FirebaseFirestore.instance
         .collection("users")
         .doc(id)
         .collection("Booking")
         .snapshots();
   }
 
-  Future<Stream<QuerySnapshot>> getEventCategories(String category) async {
-    return await FirebaseFirestore.instance
+  Stream<QuerySnapshot> getEventCategories(String category) {
+    return FirebaseFirestore.instance
         .collection("Event")
         .where("Category", isEqualTo: category)
         .snapshots();
   }
 
-  Future<Stream<QuerySnapshot>> getTickets() async {
-    return await FirebaseFirestore.instance.collection("Tickets").snapshots();
+  Stream<QuerySnapshot> getTickets() {
+    return FirebaseFirestore.instance.collection("Tickets").snapshots();
+  }
+
+  // Scavenger Hunt Methods
+  Future addScavengerHunt(Map<String, dynamic> huntMap) async {
+    return await FirebaseFirestore.instance
+        .collection("ScavengerHunts")
+        .add(huntMap);
+  }
+
+  Stream<QuerySnapshot> getScavengerHunts() {
+    return FirebaseFirestore.instance.collection("ScavengerHunts").snapshots();
   }
 }

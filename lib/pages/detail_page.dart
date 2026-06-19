@@ -510,7 +510,6 @@ class _DetailPageState extends State<DetailPage>
               ),
             ),
           ),
-          ),
         ],
       ),
       floatingActionButton: Padding(
